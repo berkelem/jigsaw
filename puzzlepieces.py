@@ -82,17 +82,21 @@ class Puzzle():
             raise ValueError('Side code does not match stored values.')
             
     def check_piece(self, piece):
+        #print 'checking piece in position {0}'.format(self.cursor)
         nbs = self.pos_nbs[self.cursor]
+        #print 'nbs for this position: ', nbs
         ind = 0
         while ind < len(nbs) and piece.rot < 360:
             i = nbs[ind]
+            #print 'Checking compatibility with neighbour position {}'.format(i)
             if i < self.cursor:
                 piece_fx = self.config[i]
-                print 'Fixed piece', (piece_fx.id, piece_fx.A, piece_fx.B, piece_fx.C, piece_fx.D)                
+                #print 'Fixed piece', (piece_fx.id, piece_fx.A, piece_fx.B, piece_fx.C, piece_fx.D)                
                 
                 side_ok = False
                 while piece.rot < 360 and not side_ok:
-                    print 'Test piece', (piece.id, piece.A, piece.B, piece.C, piece.D)
+                    #print 'Test piece', (piece.id, piece.A, piece.B, piece.C, piece.D)
+                    #print 'Test piece orientation: Up? {0}; Rot? {1}'.format(piece.up, piece.rot)
                     if i == self.cursor - 1:
                         side_fx = piece_fx.B
                         side_new = piece.D
@@ -106,11 +110,11 @@ class Puzzle():
                     else:
                         piece.rotate90cw()
                         ind = 0
-                        break
                     if piece.rot >= 360 and not side_ok:
                         if piece.up:
                             piece.flip()
                             piece.rot = 0
+                            continue
                         ind = 0
                         break
             else:
@@ -131,10 +135,13 @@ class Puzzle():
         while self.cursor < 16 and piece_no < 16:
             
             piece = self.pieces[piece_no]
+            #print 'Has piece {0} already been placed?'.format(piece.id), piece.pos
             if piece.pos:
                 piece_no += 1
+                #print 'Moving to piece {0} instead'.format(piece_no)
                 
             elif self.check_piece(piece):
+                #print 'Piece {0} successfully placed.'.format(piece.id)
                 self.config[self.cursor] = piece
                 piece.pos = True
                 self.cursor += 1
@@ -159,11 +166,11 @@ class Puzzle():
         complete = False
         while not complete:
             filled = all([p.pos for p in self.pieces])
-            #print self.cursor, piece_no
-            #print 'filled?', filled
+            #print 'working on position {0}; checking piece in {1}th position of current order'.format(self.cursor, piece_no)
             fill_pos = self.fill_position(piece_no)
             if piece_no < 16 and not filled:
                 piece_no = next(fill_pos)
+                #print 'piece no', piece_no
             #print 'active piece no', piece_no
             if piece_no > 15 and not filled:
                 #print 'config wrong', self.config
@@ -195,8 +202,9 @@ if __name__ == '__main__':
     
     order = range(16)
     orders = []
-    for i in xrange(1):#len(ord)):
-        order = order[-1:] + order[:-1]  
+    for i in xrange(len(order)):
+        order = order[-1:] + order[:-1]
+        print order
         puzzle = Puzzle()
         puzzle.fill_grid(order)
         final_config = []
